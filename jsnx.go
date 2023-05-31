@@ -55,6 +55,37 @@ func (holder *JsonHolder) Clear() {
 	holder.Data = nil
 }
 
+//解析字符串
+func Parse(jsonStr string) (*JsonHolder, error) {
+	holder := &JsonHolder{}
+
+	err := json.Unmarshal([]byte(jsonStr), &(holder.Data))
+	if err != nil {
+		return nil, err
+	}
+
+	return holder, nil
+}
+
+//解析文件
+func ParseFile(filePath string) (*JsonHolder, error){
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	holder := &JsonHolder{}
+	err = json.Unmarshal(data, &holder.Data)
+
+	return holder, nil
+}
+
 //解析对象
 func (holder *JsonHolder) Parse(jsonStr string) error {
 	holder.mu.Lock()
