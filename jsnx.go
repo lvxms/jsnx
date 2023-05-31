@@ -68,7 +68,7 @@ func Parse(jsonStr string) (*JsonHolder, error) {
 }
 
 //解析文件
-func ParseFile(filePath string) (*JsonHolder, error){
+func ParseFile(filePath string) (*JsonHolder, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
@@ -82,6 +82,9 @@ func ParseFile(filePath string) (*JsonHolder, error){
 
 	holder := &JsonHolder{}
 	err = json.Unmarshal(data, &holder.Data)
+	if err != nil {
+		return nil, err
+	}
 
 	return holder, nil
 }
@@ -493,6 +496,20 @@ func (holder *JsonHolder) GetJson(path string) (*JsonHolder, error) {
 	}
 
 	return &JsonHolder{Data: node}, nil
+}
+
+func (holder *JsonHolder) GetString(path string) (string, error) {
+	node, err := holder.Get(path)
+	if err != nil {
+		return "", err
+	}
+
+	data, err := json.Marshal(node)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
 }
 
 //获取指定位置的Key的数据
