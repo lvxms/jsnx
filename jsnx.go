@@ -33,11 +33,12 @@ func NewJsonHolder(jsonStr string) (*JsonHolder, error) {
 }
 
 type NodePos struct {
-	RootNode    *Node
-	PrevNodes   *ArryNode
-	PrevMapNode *MapNode
-	NodeIdx     int
-	NodeKey     string
+	RootNode        *Node
+	PrevNodes       *ArryNode
+	PrevMapNode     *MapNode
+	PrevArryMapNode *ArryMapNode
+	NodeIdx         int
+	NodeKey         string
 }
 
 func (np *NodePos) Set(pns *ArryNode, pmn *MapNode, idx int, key string) {
@@ -514,7 +515,7 @@ func (holder *JsonHolder) GetString(path string) (string, error) {
 		return "", err
 	}
 
-	return string(data), nil
+	return strings.Trim(string(data), "\""), nil
 }
 
 //获取指定位置的Key的数据
