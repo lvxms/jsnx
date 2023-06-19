@@ -131,11 +131,16 @@ func (holder *JsonHolder) ArryLen(path string) (int, error) {
 	}
 
 	arryNode, Ok := node.(ArryNode)
-	if !Ok {
-		return -3, fmt.Errorf("node type error")
+	if Ok {
+		return len(arryNode), nil
 	}
 
-	return len(arryNode), nil
+	arryMapNode, Ok := node.(ArryMapNode)
+	if Ok {
+		return len(arryMapNode), nil
+	}
+
+	return -3, fmt.Errorf("node type error")
 }
 
 //设置指定结点为JSON对象 /abc/1, 表示取abc 下的数组1内容; /abc/"1", 表示取/abc 下1的值
