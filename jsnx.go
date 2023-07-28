@@ -534,7 +534,7 @@ func (holder *JsonHolder) Keys(path string, isDeepArry bool) ([]string, error) {
 
 	for {
 		deepLevel++
-		fmt.Printf("DeepLevel: %v\n", deepLevel)
+		//fmt.Printf("DeepLevel: %v\n", deepLevel)
 		mapNode, ok := jsxNode.(MapNode)
 		if ok {
 			for key := range mapNode {
