@@ -16,7 +16,7 @@ type ArryNode = []interface{}
 type MapNode = map[string]interface{}
 type ArryMapNode = []map[string]interface{}
 
-//数据持有对象
+// 数据持有对象
 type JsonHolder struct {
 	Data interface{} //可取范围为 map[string]interface{}, []map[string]interface{}
 	mu   sync.RWMutex
@@ -32,6 +32,10 @@ func NewJsonHolder(jsonStr string) (*JsonHolder, error) {
 	return holder, nil
 }
 
+func NewEmptyHolder() *JsonHolder {
+	return &JsonHolder{}
+}
+
 type NodePos struct {
 	RootNode        *Node
 	PrevNodes       *ArryNode
@@ -39,16 +43,23 @@ type NodePos struct {
 	PrevArryMapNode *ArryMapNode
 	NodeIdx         int
 	NodeKey         string
+
+	PreType int //上个结点类型: 0=根结点,1=MapNode, 2=ArryNode, 3=ArryMapNode
 }
 
 func (np *NodePos) Set(pns *ArryNode, pmn *MapNode, idx int, key string) {
+	if idx >= 0 {
+		np.PreType = 2
+	} else {
+		np.PreType = 1
+	}
 	np.PrevNodes = pns
 	np.PrevMapNode = pmn
 	np.NodeIdx = idx
 	np.NodeKey = key
 }
 
-//清空JSON对象
+// 清空JSON对象
 func (holder *JsonHolder) Clear() {
 	holder.mu.Lock()
 	defer holder.mu.Unlock()
@@ -56,7 +67,7 @@ func (holder *JsonHolder) Clear() {
 	holder.Data = nil
 }
 
-//解析字符串
+// 解析字符串
 func Parse(jsonStr string) (*JsonHolder, error) {
 	holder := &JsonHolder{}
 
@@ -68,7 +79,7 @@ func Parse(jsonStr string) (*JsonHolder, error) {
 	return holder, nil
 }
 
-//解析文件
+// 解析文件
 func ParseFile(filePath string) (*JsonHolder, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -90,7 +101,7 @@ func ParseFile(filePath string) (*JsonHolder, error) {
 	return holder, nil
 }
 
-//解析对象
+// 解析对象
 func (holder *JsonHolder) Parse(jsonStr string) error {
 	holder.mu.Lock()
 	defer holder.mu.Unlock()
@@ -99,7 +110,7 @@ func (holder *JsonHolder) Parse(jsonStr string) error {
 	return err
 }
 
-//解析文件
+// 解析文件
 func (holder *JsonHolder) ParseFile(filePath string) error {
 	holder.mu.Lock()
 	defer holder.mu.Unlock()
@@ -144,7 +155,7 @@ func (holder *JsonHolder) ArryLen(path string) (int, error) {
 	return -3, fmt.Errorf("node type error")
 }
 
-//设置指定结点为JSON对象 /abc/1, 表示取abc 下的数组1内容; /abc/"1", 表示取/abc 下1的值
+// 设置指定结点为JSON对象 /abc/1, 表示取abc 下的数组1内容; /abc/"1", 表示取/abc 下1的值
 func (holder *JsonHolder) SetJson(path string, jsonObj interface{}) error {
 	var (
 		ArryIndex int
@@ -174,6 +185,7 @@ func (holder *JsonHolder) SetJson(path string, jsonObj interface{}) error {
 		//当KEY值为数字时，如果有双引号包括表示键值；否则表示数组索引, 索引从0开始
 		pathBuff.WriteString("/" + key)
 
+		//判断是否为数组(ArryIndex >= 0 时为数组)
 		ArryIndex = -1
 		if key != "" {
 			if strings.HasPrefix(key, "\"") && strings.HasSuffix(key, "\"") {
@@ -188,6 +200,7 @@ func (holder *JsonHolder) SetJson(path string, jsonObj interface{}) error {
 			ArryIndex = 0
 		}
 
+		//本层结点为数组时处理
 		if ArryIndex >= 0 {
 			var arryNode ArryNode
 
@@ -327,10 +340,17 @@ func (holder *JsonHolder) SetJson(path string, jsonObj interface{}) error {
 				}
 
 				if mapNode == nil {
-					mapNode, OkFlag = (*nPos.RootNode).(MapNode)
-					if !OkFlag {
-						return fmt.Errorf("Convert Err(%v)", pathBuff.String())
+					if nPos.PreType == 0 {
+						//根结点
+						mapNode, OkFlag = (*nPos.RootNode).(MapNode)
+						if !OkFlag {
+							return fmt.Errorf("Convert Err(%v)", pathBuff.String())
+						}
+					} else {
+						//非根结点
+						mapNode, OkFlag = ((*nPos.PrevMapNode)[nPos.NodeKey]).(MapNode)
 					}
+
 				}
 			}
 
@@ -339,7 +359,8 @@ func (holder *JsonHolder) SetJson(path string, jsonObj interface{}) error {
 				//不存在时才增加空结点
 				//mapNode[key] = nil
 				if _, exist := mapNode[key]; !exist {
-					mapNode[key] = nil
+					//mapNode[key] = nil
+					mapNode[key] = make(MapNode, 0)
 				}
 
 				nPos.Set(nil, &mapNode, -1, key)
@@ -356,7 +377,7 @@ func (holder *JsonHolder) SetJson(path string, jsonObj interface{}) error {
 	return nil
 }
 
-//获取指定位置的数据
+// 获取指定位置的数据
 func (holder *JsonHolder) Get(path string) (Node, error) {
 	var (
 		ArryIndex int      //数组索引位置
@@ -518,7 +539,7 @@ func (holder *JsonHolder) GetString(path string) (string, error) {
 	return strings.Trim(string(data), "\""), nil
 }
 
-//获取指定位置的Key的数据
+// 获取指定位置的Key的数据
 func (holder *JsonHolder) Keys(path string, isDeepArry bool) ([]string, error) {
 	deepLevel := 0
 	keys := make([]string, 0)
@@ -794,7 +815,7 @@ func (holder *JsonHolder) Del(path string) error {
 	return nil
 }
 
-//格式化JSON字符串
+// 格式化JSON字符串
 func (holder *JsonHolder) String(path, formatter string) (string, error) {
 	holder.mu.RLock()
 	defer holder.mu.RUnlock()
@@ -820,7 +841,7 @@ func (holder *JsonHolder) String(path, formatter string) (string, error) {
 	return jsonStr, nil
 }
 
-//格式化
+// 格式化
 func FormatJson(v interface{}, formatter string) (string, error) {
 	var data []byte
 	var err error
@@ -838,7 +859,7 @@ func FormatJson(v interface{}, formatter string) (string, error) {
 	return string(data), nil
 }
 
-//深度复制数据
+// 深度复制数据
 func CopyFrom(srcHolder *JsonHolder, path string) (*JsonHolder, error) {
 	var newNode Node
 	node, err := srcHolder.Get(path)
@@ -859,7 +880,7 @@ func CopyFrom(srcHolder *JsonHolder, path string) (*JsonHolder, error) {
 	return &JsonHolder{Data: newNode}, nil
 }
 
-//格式化Json
+// 格式化Json
 func FormatString(srcJsonStr, formatter string) (string, error) {
 	var jsonData interface{}
 	var destData []byte
