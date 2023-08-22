@@ -902,3 +902,36 @@ func FormatString(srcJsonStr, formatter string) (string, error) {
 func (holder *JsonHolder) Copy(path string) (*JsonHolder, error) {
 	return CopyFrom(holder, path)
 }
+
+// 以逗号分隔
+func (holder *JsonHolder) CopyNodes(path string, fromJsx *JsonHolder, fromPaths string, isLastName ...bool) {
+	isShortFlag := true
+
+	fromPaths = strings.TrimSpace(fromPaths)
+	if fromPaths == "" {
+		return
+	}
+
+	if len(isLastName) > 0 {
+		isShortFlag = isLastName[0]
+	}
+
+	fromNames := strings.Split(fromPaths, ",")
+	for _, name := range fromNames {
+		node, err := fromJsx.Get(name)
+		if err != nil {
+			continue
+		}
+
+		if isShortFlag {
+			idx := strings.LastIndex(name, "/")
+			if idx >= 0 {
+				name = name[idx+1:]
+			}
+		}
+
+		holder.SetJson(path+"/"+strings.TrimLeft(name, "/"), node)
+	}
+
+	return
+}
