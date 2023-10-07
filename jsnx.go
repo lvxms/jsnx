@@ -539,6 +539,16 @@ func (holder *JsonHolder) GetString(path string) (string, error) {
 	return strings.Trim(string(data), "\""), nil
 }
 
+// 判断Key是否存在
+func (holder *JsonHolder) Exist(path string) bool {
+	node, err := holder.Get(path)
+	if err != nil {
+		return false
+	}
+
+	return (node != nil)
+}
+
 // 获取指定位置的Key的数据
 func (holder *JsonHolder) Keys(path string, isDeepArry bool) ([]string, error) {
 	deepLevel := 0
