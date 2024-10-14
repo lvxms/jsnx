@@ -22,14 +22,10 @@ type JsonHolder struct {
 	mu   sync.RWMutex
 }
 
-func NewJsonHolder(jsonStr string) (*JsonHolder, error) {
+func NewJsonHolder(data interface{}) (*JsonHolder, error) {
 	holder := &JsonHolder{}
-	err := holder.Parse(jsonStr)
-	if err != nil {
-		return nil, err
-	}
-
-	return holder, nil
+	err := holder.Parse(data)
+	return holder, err
 }
 
 func NewEmptyHolder() *JsonHolder {
@@ -68,15 +64,10 @@ func (holder *JsonHolder) Clear() {
 }
 
 // 解析字符串
-func Parse(jsonStr string) (*JsonHolder, error) {
+func Parse(data interface{}) (*JsonHolder, error) {
 	holder := &JsonHolder{}
-
-	err := json.Unmarshal([]byte(jsonStr), &(holder.Data))
-	if err != nil {
-		return nil, err
-	}
-
-	return holder, nil
+	err := holder.Parse(data)
+	return holder, err
 }
 
 // 解析文件
@@ -102,11 +93,24 @@ func ParseFile(filePath string) (*JsonHolder, error) {
 }
 
 // 解析对象
-func (holder *JsonHolder) Parse(jsonStr string) error {
+func (holder *JsonHolder) Parse(data interface{}) error {
+	var (
+		err       error
+		jsonStr   string
+		jsonBytes []byte
+		ok        bool
+	)
 	holder.mu.Lock()
 	defer holder.mu.Unlock()
 
-	err := json.Unmarshal([]byte(jsonStr), &(holder.Data))
+	if jsonStr, ok = data.(string); ok {
+		err = json.Unmarshal([]byte(jsonStr), &(holder.Data))
+	} else if jsonBytes, ok = data.([]byte); ok {
+		err = json.Unmarshal(jsonBytes, &(holder.Data))
+	} else {
+		holder.Data = data
+	}
+
 	return err
 }
 
