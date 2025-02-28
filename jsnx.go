@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 type Node = interface{}
@@ -529,18 +530,116 @@ func (holder *JsonHolder) GetJson(path string) (*JsonHolder, error) {
 	return &JsonHolder{Data: node}, nil
 }
 
+// 获取字符串数据
 func (holder *JsonHolder) GetString(path string) (string, error) {
 	node, err := holder.Get(path)
 	if err != nil {
 		return "", err
 	}
 
+	//如果对象为空，则返回空字符串，以免后面序列化后为null值
+	if node == nil {
+		return "", nil
+	}
+
+	//此处如果node=nil,则data=null
 	data, err := json.Marshal(node)
 	if err != nil {
 		return "", err
 	}
 
 	return strings.Trim(string(data), "\""), nil
+}
+
+// 获取整型数据
+func (holder *JsonHolder) GetInt(path string) (int, error) {
+	node, err := holder.Get(path)
+	if err != nil {
+		return 0, err
+	}
+
+	if node == nil {
+		return 0, nil
+	}
+
+	switch node.(type) {
+	case int:
+		return node.(int), nil
+	case float64:
+		return int(node.(float64)), nil
+	case string:
+		i, err := strconv.ParseInt(node.(string), 10, 32)
+		if err != nil {
+			return 0, err
+		}
+		return int(i), nil
+	default:
+		return 0, fmt.Errorf("invalid type")
+	}
+}
+
+// 获取浮点型数据
+func (holder *JsonHolder) GetFloat(path string) (float64, error) {
+	node, err := holder.Get(path)
+	if err != nil {
+		return 0, err
+	}
+
+	if node == nil {
+		return 0, nil
+	}
+
+	switch node.(type) {
+	case int:
+		return float64(node.(int)), nil
+	case float64:
+		return node.(float64), nil
+	case string:
+		f, err := strconv.ParseFloat(node.(string), 64)
+		if err != nil {
+			return 0, err
+		}
+		return f, nil
+	default:
+		return 0, fmt.Errorf("invalid type")
+	}
+}
+
+// 获取时间数据
+func (holder *JsonHolder) GetTime(path string, formatStr ...string) (time.Time, error) {
+	node, err := holder.Get(path)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	if node == nil {
+		return time.Time{}, fmt.Errorf("Path (%v) Is Not Valid", path)
+	}
+
+	switch node.(type) {
+	case int:
+		return time.Unix(int64(node.(int)), 0), nil
+	case int64:
+		return time.Unix(node.(int64), 0), nil
+	case float64:
+		return time.Unix(int64(node.(float64)), 0), nil
+	case string:
+		layoutStr := ""
+		if len(formatStr) > 0 {
+			layoutStr = formatStr[0]
+		} else {
+			layoutStr = time.RFC3339
+		}
+
+		t, err := time.Parse(layoutStr, node.(string))
+		if err != nil {
+			return time.Time{}, err
+		}
+		return t, nil
+
+	default:
+		return time.Time{}, fmt.Errorf("invalid type")
+	}
 }
 
 // 判断Key是否存在
@@ -669,7 +768,7 @@ func (holder *JsonHolder) Del(path string) error {
 				}
 
 				if i == keyLen-1 {
-					//最终结点, 打到内容
+					//最终结点, 找到内容
 					arrLen := len(arryNode)
 					if ArryIndex == 0 {
 						if arrLen == 1 {
