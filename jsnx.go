@@ -268,10 +268,9 @@ func (holder *JsonHolder) SetJson(path string, jsonObj interface{}) error {
 
 					if i < keyLen-1 {
 						//中间结点
-
-						if ArryIndex >= len(arryNode) {
-							//需补空白节点
-							arryNode = append(arryNode, nil)
+						//arryNode = append(arryNode, nil)
+						if ArryIndex >= len(arryNode) {							
+							arryNode = append(arryNode, nil)  //需补空白节点
 						}
 
 						(*nPos.RootNode) = arryNode
