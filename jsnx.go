@@ -781,7 +781,13 @@ func (holder *JsonHolder) Del(path string) error {
 						if arrLen == 1 {
 							((*nPos.PrevMapNode)[nPos.NodeKey]) = nil
 						} else {
-							((*nPos.PrevMapNode)[nPos.NodeKey]) = arryNode[1:]
+							if i == 0 {
+								//是终结点，同时也是根结点
+								(*nPos.RootNode) = arryNode[1:]
+							}else{
+								//非根结点
+								((*nPos.PrevMapNode)[nPos.NodeKey]) = arryNode[1:]
+							}
 						}
 					} else if ArryIndex == arrLen-1 {
 						((*nPos.PrevMapNode)[nPos.NodeKey]) = arryNode[0 : arrLen-1]
