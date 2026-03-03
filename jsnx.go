@@ -941,6 +941,21 @@ func (holder *JsonHolder) Del(path string) error {
 	return nil
 }
 
+//删除指定路径结点，并返回结点内容
+func (holder *JsonHolder) Remove(path string) (interface{}, error){
+	node, err := holder.Get(path)
+	if err != nil {
+		return nil, err
+	}
+
+	err = holder.Del(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return node, nil
+}
+
 // 格式化JSON字符串
 func (holder *JsonHolder) String(path, formatter string) (string, error) {
 	holder.mu.RLock()
@@ -1060,4 +1075,116 @@ func (holder *JsonHolder) CopyNodes(path string, fromJsx *JsonHolder, fromPaths 
 	}
 
 	return
+}
+
+//遍历数组节点
+func (holder *JsonHolder) Iter(path string, fn func(int, interface{}) error) error {
+	nums, err := holder.ArryLen(path)
+	if err != nil {
+		return err
+	}
+
+	if nums < 0 {
+		return fmt.Errorf("Node[%s] not array", path)
+	}
+
+	for i:=0; i < nums; i++ {
+		path2 := fmt.Sprintf("path/%d", i)
+		path2 = strings.ReplaceAll(path2, "//", "/")	//替换掉路径中//
+		node, err := holder.Get(path2)
+		if err != nil {
+			return err
+		}
+
+		err = fn(i, node)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+//遍历数组节点
+func (holder *JsonHolder) IterHolder(path string, fn func(int, *JsonHolder)error) error{
+	nums, err := holder.ArryLen(path)
+	if err != nil {
+		return err
+	}
+
+	if nums < 0 {
+		return fmt.Errorf("Node[%s] not array", path)
+	}
+
+	for i:=0; i < nums; i++ {
+		path2 := fmt.Sprintf("path/%d", i)
+		path2 = strings.ReplaceAll(path2, "//", "/")	//替换掉路径中//
+		node, err := holder.Get(path2)
+		if err != nil {
+			return err
+		}
+
+		err = fn(i, Holder(node))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// 包装JSON数据
+func Holder(data interface{}) *JsonHolder{
+	return &JsonHolder{Data: data}
+}
+
+//获取data 中， 指定的数据 path 
+func GetJson(data interface{}, path string) (*JsonHolder, error){
+	jsx := &JsonHolder{Data: data}
+	return jsx.GetJson(path)
+}
+
+func GetString(data interface{}, path string)(string, error){
+	jsx := &JsonHolder{Data: data}
+	return jsx.GetString(path)
+}
+
+func GetFloat(data interface{}, path string)(float64, error){
+	jsx := &JsonHolder{Data: data}
+	return jsx.GetFloat(path)
+}
+
+func GetInt(data interface{}, path string)(int, error){
+	jsx := &JsonHolder{Data: data}
+	return jsx.GetInt(path)
+}
+
+func GetTime(data interface{}, path string, formatStr ...string)(time.Time, error){
+	jsx := &JsonHolder{Data: data}
+	return jsx.GetTime(path, formatStr...)
+}
+
+func SetJson(data interface{}, path string, jsonObj interface{})(error){
+	jsx := &JsonHolder{Data: data}
+	return jsx.SetJson(path, jsonObj)
+}
+
+func Del(data interface{}, path string) error {
+	jsx := &JsonHolder{Data: data}
+	return jsx.Del(path)
+}
+
+func Remove(data interface{}, path string)(interface{}, error){
+	jsx := &JsonHolder{Data: data}
+	return jsx.Remove(path)
+}
+
+func Iter(data interface{}, path string, fn func(int,interface{})error)error{
+	jsx := &JsonHolder{Data: data}
+	return jsx.Iter(path, fn)
+}
+
+func IterHolder(data interface{}, path string, fn func(int, *JsonHolder)error)error{
+	jsx := &JsonHolder{Data: data}
+	return jsx.IterHolder(path, fn)
 }
