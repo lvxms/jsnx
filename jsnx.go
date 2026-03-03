@@ -1078,7 +1078,7 @@ func (holder *JsonHolder) CopyNodes(path string, fromJsx *JsonHolder, fromPaths 
 }
 
 //遍历数组节点
-func (holder *JsonHolder) Iter(path string, fn func(int, interface{}) error) error {
+func (holder *JsonHolder) Iter(path string, fn func(i int, node interface{}) error) error {
 	nums, err := holder.ArryLen(path)
 	if err != nil {
 		return err
@@ -1106,7 +1106,7 @@ func (holder *JsonHolder) Iter(path string, fn func(int, interface{}) error) err
 }
 
 //遍历数组节点
-func (holder *JsonHolder) IterHolder(path string, fn func(int, *JsonHolder)error) error{
+func (holder *JsonHolder) IterHolder(path string, fn func(i int, nHolder *JsonHolder)error) error{
 	nums, err := holder.ArryLen(path)
 	if err != nil {
 		return err
@@ -1179,12 +1179,12 @@ func Remove(data interface{}, path string)(interface{}, error){
 	return jsx.Remove(path)
 }
 
-func Iter(data interface{}, path string, fn func(int,interface{})error)error{
+func Iter(data interface{}, path string, fn func(i int,node interface{})error)error{
 	jsx := &JsonHolder{Data: data}
 	return jsx.Iter(path, fn)
 }
 
-func IterHolder(data interface{}, path string, fn func(int, *JsonHolder)error)error{
+func IterHolder(data interface{}, path string, fn func(i int, nHolder *JsonHolder)error)error{
 	jsx := &JsonHolder{Data: data}
 	return jsx.IterHolder(path, fn)
 }
