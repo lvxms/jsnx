@@ -1095,8 +1095,9 @@ func (holder *JsonHolder) Iter(path string, fn func(i int, node interface{}) err
 		path2 = strconv.Itoa(i)
 		if path != "" {
 			path2 = path + "/" + path2
+			path2 = strings.ReplaceAll(path2, "//", "/")	//替换掉路径中//
 		}
-		path2 = strings.ReplaceAll(path2, "//", "/")	//替换掉路径中//
+		
 		node, err := holder.Get(path2)
 		if err != nil {
 			return err
@@ -1129,9 +1130,9 @@ func (holder *JsonHolder) IterHolder(path string, fn func(i int, nHolder *JsonHo
 		path2 = strconv.Itoa(i)
 		if path != "" {
 			path2 = path + "/" + path2
+			path2 = strings.ReplaceAll(path2, "//", "/")	//替换掉路径中//
 		}
-
-		path2 = strings.ReplaceAll(path2, "//", "/")	//替换掉路径中//
+		
 		node, err := holder.Get(path2)
 		if err != nil {
 			return err
