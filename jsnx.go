@@ -1079,6 +1079,9 @@ func (holder *JsonHolder) CopyNodes(path string, fromJsx *JsonHolder, fromPaths 
 
 //遍历数组节点
 func (holder *JsonHolder) Iter(path string, fn func(i int, node interface{}) error) error {
+	var (
+		path2 string
+	)
 	nums, err := holder.ArryLen(path)
 	if err != nil {
 		return err
@@ -1089,7 +1092,10 @@ func (holder *JsonHolder) Iter(path string, fn func(i int, node interface{}) err
 	}
 
 	for i:=0; i < nums; i++ {
-		path2 := fmt.Sprintf("path/%d", i)
+		path2 = strconv.Itoa(i)
+		if path != "" {
+			path2 = path + "/" + path2
+		}
 		path2 = strings.ReplaceAll(path2, "//", "/")	//替换掉路径中//
 		node, err := holder.Get(path2)
 		if err != nil {
@@ -1107,6 +1113,9 @@ func (holder *JsonHolder) Iter(path string, fn func(i int, node interface{}) err
 
 //遍历数组节点
 func (holder *JsonHolder) IterHolder(path string, fn func(i int, nHolder *JsonHolder)error) error{
+	var (
+		path2 string
+	)
 	nums, err := holder.ArryLen(path)
 	if err != nil {
 		return err
@@ -1117,7 +1126,11 @@ func (holder *JsonHolder) IterHolder(path string, fn func(i int, nHolder *JsonHo
 	}
 
 	for i:=0; i < nums; i++ {
-		path2 := fmt.Sprintf("path/%d", i)
+		path2 = strconv.Itoa(i)
+		if path != "" {
+			path2 = path + "/" + path2
+		}
+
 		path2 = strings.ReplaceAll(path2, "//", "/")	//替换掉路径中//
 		node, err := holder.Get(path2)
 		if err != nil {
