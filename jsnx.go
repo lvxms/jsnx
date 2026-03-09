@@ -269,8 +269,8 @@ func (holder *JsonHolder) SetJson(path string, jsonObj interface{}) error {
 					if i < keyLen-1 {
 						//中间结点
 						//arryNode = append(arryNode, nil)
-						if ArryIndex >= len(arryNode) {							
-							arryNode = append(arryNode, nil)  //需补空白节点
+						if ArryIndex >= len(arryNode) {
+							arryNode = append(arryNode, nil) //需补空白节点
 						}
 
 						(*nPos.RootNode) = arryNode
@@ -777,18 +777,23 @@ func (holder *JsonHolder) Del(path string) error {
 					arrLen := len(arryNode)
 					if ArryIndex == 0 {
 						if arrLen == 1 {
-							(*nPos.RootNode) = make(ArryNode,0)	//赋值空数组
+							(*nPos.RootNode) = make(ArryNode, 0) //赋值空数组
 						} else {
 							if i == 0 {
 								//是终结点，同时也是根结点
 								(*nPos.RootNode) = arryNode[1:]
-							}else{
+							} else {
 								//非根结点
 								((*nPos.PrevMapNode)[nPos.NodeKey]) = arryNode[1:]
 							}
 						}
 					} else if ArryIndex == arrLen-1 {
-						((*nPos.PrevMapNode)[nPos.NodeKey]) = arryNode[0 : arrLen-1]
+						//((*nPos.PrevMapNode)[nPos.NodeKey]) = arryNode[0 : arrLen-1] //mdw
+						if i == 0 {
+							(*nPos.RootNode) = arryNode[:arrLen-2] //删除数组中最后一个元素
+						} else {
+							((*nPos.PrevMapNode)[nPos.NodeKey]) = arryNode[0 : arrLen-2]
+						}
 					} else {
 						tmpArryNode := arryNode[0:ArryIndex]
 						tmpArryNode = append(tmpArryNode, arryNode[ArryIndex+1:])
@@ -940,8 +945,8 @@ func (holder *JsonHolder) Del(path string) error {
 	return nil
 }
 
-//删除指定路径结点，并返回结点内容
-func (holder *JsonHolder) Remove(path string) (interface{}, error){
+// 删除指定路径结点，并返回结点内容
+func (holder *JsonHolder) Remove(path string) (interface{}, error) {
 	node, err := holder.Get(path)
 	if err != nil {
 		return nil, err
@@ -980,7 +985,6 @@ func (holder *JsonHolder) String(path, formatter string) (string, error) {
 
 	return jsonStr, nil
 }
-
 
 // 格式化
 func FormatJson(v interface{}, formatter string) (string, error) {
@@ -1077,7 +1081,7 @@ func (holder *JsonHolder) CopyNodes(path string, fromJsx *JsonHolder, fromPaths 
 	return
 }
 
-//遍历数组节点
+// 遍历数组节点
 func (holder *JsonHolder) Iter(path string, fn func(i int, node interface{}) error) error {
 	var (
 		path2 string
@@ -1091,13 +1095,13 @@ func (holder *JsonHolder) Iter(path string, fn func(i int, node interface{}) err
 		return fmt.Errorf("Node[%s] not array", path)
 	}
 
-	for i:=0; i < nums; i++ {
+	for i := 0; i < nums; i++ {
 		path2 = strconv.Itoa(i)
 		if path != "" {
 			path2 = path + "/" + path2
-			path2 = strings.ReplaceAll(path2, "//", "/")	//替换掉路径中//
+			path2 = strings.ReplaceAll(path2, "//", "/") //替换掉路径中//
 		}
-		
+
 		node, err := holder.Get(path2)
 		if err != nil {
 			return err
@@ -1112,8 +1116,8 @@ func (holder *JsonHolder) Iter(path string, fn func(i int, node interface{}) err
 	return nil
 }
 
-//遍历数组节点
-func (holder *JsonHolder) IterHolder(path string, fn func(i int, nHolder *JsonHolder)error) error{
+// 遍历数组节点
+func (holder *JsonHolder) IterHolder(path string, fn func(i int, nHolder *JsonHolder) error) error {
 	var (
 		path2 string
 	)
@@ -1126,13 +1130,13 @@ func (holder *JsonHolder) IterHolder(path string, fn func(i int, nHolder *JsonHo
 		return fmt.Errorf("Node[%s] not array", path)
 	}
 
-	for i:=0; i < nums; i++ {
+	for i := 0; i < nums; i++ {
 		path2 = strconv.Itoa(i)
 		if path != "" {
 			path2 = path + "/" + path2
-			path2 = strings.ReplaceAll(path2, "//", "/")	//替换掉路径中//
+			path2 = strings.ReplaceAll(path2, "//", "/") //替换掉路径中//
 		}
-		
+
 		node, err := holder.Get(path2)
 		if err != nil {
 			return err
@@ -1148,37 +1152,37 @@ func (holder *JsonHolder) IterHolder(path string, fn func(i int, nHolder *JsonHo
 }
 
 // 包装JSON数据
-func Holder(data interface{}) *JsonHolder{
+func Holder(data interface{}) *JsonHolder {
 	return &JsonHolder{Data: data}
 }
 
-//获取data 中， 指定的数据 path 
-func GetJson(data interface{}, path string) (*JsonHolder, error){
+// 获取data 中， 指定的数据 path
+func GetJson(data interface{}, path string) (*JsonHolder, error) {
 	jsx := &JsonHolder{Data: data}
 	return jsx.GetJson(path)
 }
 
-func GetString(data interface{}, path string)(string, error){
+func GetString(data interface{}, path string) (string, error) {
 	jsx := &JsonHolder{Data: data}
 	return jsx.GetString(path)
 }
 
-func GetFloat(data interface{}, path string)(float64, error){
+func GetFloat(data interface{}, path string) (float64, error) {
 	jsx := &JsonHolder{Data: data}
 	return jsx.GetFloat(path)
 }
 
-func GetInt(data interface{}, path string)(int, error){
+func GetInt(data interface{}, path string) (int, error) {
 	jsx := &JsonHolder{Data: data}
 	return jsx.GetInt(path)
 }
 
-func GetTime(data interface{}, path string, formatStr ...string)(time.Time, error){
+func GetTime(data interface{}, path string, formatStr ...string) (time.Time, error) {
 	jsx := &JsonHolder{Data: data}
 	return jsx.GetTime(path, formatStr...)
 }
 
-func SetJson(data interface{}, path string, jsonObj interface{})(error){
+func SetJson(data interface{}, path string, jsonObj interface{}) error {
 	jsx := &JsonHolder{Data: data}
 	return jsx.SetJson(path, jsonObj)
 }
@@ -1188,17 +1192,17 @@ func Del(data interface{}, path string) error {
 	return jsx.Del(path)
 }
 
-func Remove(data interface{}, path string)(interface{}, error){
+func Remove(data interface{}, path string) (interface{}, error) {
 	jsx := &JsonHolder{Data: data}
 	return jsx.Remove(path)
 }
 
-func Iter(data interface{}, path string, fn func(i int,node interface{})error)error{
+func Iter(data interface{}, path string, fn func(i int, node interface{}) error) error {
 	jsx := &JsonHolder{Data: data}
 	return jsx.Iter(path, fn)
 }
 
-func IterHolder(data interface{}, path string, fn func(i int, nHolder *JsonHolder)error)error{
+func IterHolder(data interface{}, path string, fn func(i int, nHolder *JsonHolder) error) error {
 	jsx := &JsonHolder{Data: data}
 	return jsx.IterHolder(path, fn)
 }
