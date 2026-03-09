@@ -369,9 +369,7 @@ func (holder *JsonHolder) SetJson(path string, jsonObj interface{}) error {
 			if i < keyLen-1 {
 				//中间结点
 				//不存在时才增加空结点
-				//mapNode[key] = nil
 				if _, exist := mapNode[key]; !exist {
-					//mapNode[key] = nil
 					mapNode[key] = make(MapNode, 0)
 				}
 
@@ -779,7 +777,7 @@ func (holder *JsonHolder) Del(path string) error {
 					arrLen := len(arryNode)
 					if ArryIndex == 0 {
 						if arrLen == 1 {
-							((*nPos.PrevMapNode)[nPos.NodeKey]) = nil
+							(*nPos.RootNode) = make(ArryNode,0)	//赋值空数组
 						} else {
 							if i == 0 {
 								//是终结点，同时也是根结点
@@ -797,7 +795,6 @@ func (holder *JsonHolder) Del(path string) error {
 						((*nPos.PrevMapNode)[nPos.NodeKey]) = tmpArryNode
 					}
 
-					//arryNode[ArryIndex] = nil
 					return nil
 				}
 
@@ -818,11 +815,12 @@ func (holder *JsonHolder) Del(path string) error {
 					}
 
 					if i == keyLen-1 {
-						//最终结点, 打到内容
+						//最终结点, 找到内容
 						arrLen := len(arryNode)
 						if ArryIndex == 0 {
 							if arrLen == 1 {
-								((*nPos.PrevNodes)[nPos.NodeIdx]) = nil
+								//((*nPos.PrevNodes)[nPos.NodeIdx]) = nil
+								((*nPos.PrevNodes)[nPos.NodeIdx]) = make(ArryNode, 0)
 							} else {
 								((*nPos.PrevNodes)[nPos.NodeIdx]) = arryNode[1:]
 							}
@@ -855,11 +853,12 @@ func (holder *JsonHolder) Del(path string) error {
 					}
 
 					if i == keyLen-1 {
-						//最终结点, 打到内容
+						//最终结点, 找到内容
 						arrLen := len(arryNode)
 						if ArryIndex == 0 {
 							if arrLen == 1 {
-								((*nPos.PrevMapNode)[nPos.NodeKey]) = nil //是否赋值为空数组
+								//((*nPos.PrevMapNode)[nPos.NodeKey]) = nil //是否赋值为空数组
+								((*nPos.PrevMapNode)[nPos.NodeKey]) = make(ArryNode, 0)
 							} else {
 								((*nPos.PrevMapNode)[nPos.NodeKey]) = arryNode[1:]
 							}
@@ -981,6 +980,7 @@ func (holder *JsonHolder) String(path, formatter string) (string, error) {
 
 	return jsonStr, nil
 }
+
 
 // 格式化
 func FormatJson(v interface{}, formatter string) (string, error) {
