@@ -796,8 +796,13 @@ func (holder *JsonHolder) Del(path string) error {
 						}
 					} else {
 						tmpArryNode := arryNode[0:ArryIndex]
-						tmpArryNode = append(tmpArryNode, arryNode[ArryIndex+1:])
-						((*nPos.PrevMapNode)[nPos.NodeKey]) = tmpArryNode
+						tmpArryNode = append(tmpArryNode, arryNode[ArryIndex+1:]...)
+						if i == 0 {
+							(*nPos.RootNode) = tmpArryNode
+						} else {
+							((*nPos.PrevMapNode)[nPos.NodeKey]) = tmpArryNode
+						}
+
 					}
 
 					return nil
@@ -833,7 +838,7 @@ func (holder *JsonHolder) Del(path string) error {
 							((*nPos.PrevNodes)[nPos.NodeIdx]) = arryNode[0 : arrLen-1]
 						} else {
 							tmpArryNode := arryNode[0:ArryIndex]
-							tmpArryNode = append(tmpArryNode, arryNode[ArryIndex+1:])
+							tmpArryNode = append(tmpArryNode, arryNode[ArryIndex+1:]...)
 							((*nPos.PrevNodes)[nPos.NodeIdx]) = tmpArryNode
 						}
 
@@ -871,7 +876,7 @@ func (holder *JsonHolder) Del(path string) error {
 							((*nPos.PrevMapNode)[nPos.NodeKey]) = arryNode[0 : arrLen-1]
 						} else {
 							tmpArryNode := arryNode[0:ArryIndex]
-							tmpArryNode = append(tmpArryNode, arryNode[ArryIndex+1:])
+							tmpArryNode = append(tmpArryNode, arryNode[ArryIndex+1:]...)
 							((*nPos.PrevMapNode)[nPos.NodeKey]) = tmpArryNode
 						}
 
