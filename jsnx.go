@@ -790,9 +790,9 @@ func (holder *JsonHolder) Del(path string) error {
 					} else if ArryIndex == arrLen-1 {
 						//((*nPos.PrevMapNode)[nPos.NodeKey]) = arryNode[0 : arrLen-1] //mdw
 						if i == 0 {
-							(*nPos.RootNode) = arryNode[:arrLen-2] //删除数组中最后一个元素
+							(*nPos.RootNode) = arryNode[:arrLen-1] //删除数组中最后一个元素
 						} else {
-							((*nPos.PrevMapNode)[nPos.NodeKey]) = arryNode[0 : arrLen-2]
+							((*nPos.PrevMapNode)[nPos.NodeKey]) = arryNode[0 : arrLen-1]
 						}
 					} else {
 						tmpArryNode := arryNode[0:ArryIndex]
