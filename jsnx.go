@@ -1009,6 +1009,39 @@ func FormatJson(v interface{}, formatter string) (string, error) {
 	return string(data), nil
 }
 
+// DeepCopyMap 深度复制 map[string]any
+func deepCopyMap(src map[string]any) map[string]any {
+	if src == nil {
+		return nil
+	}
+	dst := make(map[string]any, len(src))
+	for k, v := range src {
+		dst[k] = deepCopyValue(v)
+	}
+	return dst
+}
+
+func deepCopyValue(v any) any {
+	switch val := v.(type) {
+	case map[string]any:
+		// 嵌套map，递归拷贝
+		return deepCopyMap(val)
+	case []any:
+		// 切片
+		newSlice := make([]any, len(val))
+		for i, item := range val {
+			newSlice[i] = deepCopyValue(item)
+		}
+		return newSlice
+	// 基础类型 string, int, bool, float64 直接返回，值拷贝
+	case string, int, int64, bool, float64:
+		return val
+	default:
+		// 其他类型直接返回（如果有结构体需要额外处理）
+		return val
+	}
+}
+
 // 深度复制数据
 func CopyFrom(srcHolder *JsonHolder, path string) (*JsonHolder, error) {
 	var newNode Node
@@ -1017,15 +1050,16 @@ func CopyFrom(srcHolder *JsonHolder, path string) (*JsonHolder, error) {
 		return nil, err
 	}
 
-	data, err := json.Marshal(node)
-	if err != nil {
-		return nil, err
-	}
+	// data, err := json.Marshal(node)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	err = json.Unmarshal(data, &newNode)
-	if err != nil {
-		return nil, err
-	}
+	// err = json.Unmarshal(data, &newNode)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	newNode = deepCopyValue(node)
 
 	return &JsonHolder{Data: newNode}, nil
 }
