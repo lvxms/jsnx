@@ -93,6 +93,16 @@ func ParseFile(filePath string) (*JsonHolder, error) {
 	return holder, nil
 }
 
+// 保存内容到文件
+func (holder *JsonHolder) SaveTo(filePath string) error {
+	jsxStr, err := holder.String("", "    ")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(filePath, []byte(jsxStr), 0644)
+}
+
 // 解析对象
 func (holder *JsonHolder) Parse(data interface{}) error {
 	var (
