@@ -1246,12 +1246,12 @@ func Remove(data interface{}, path string) (interface{}, error) {
 	return jsx.Remove(path)
 }
 
-func Iter(data interface{}, path string, fn func(i int, node interface{}) error) error {
-	jsx := &JsonHolder{Data: data}
-	return jsx.Iter(path, fn)
-}
-
 func IterHolder(data interface{}, path string, fn func(i int, nHolder *JsonHolder) error) error {
 	jsx := &JsonHolder{Data: data}
 	return jsx.IterHolder(path, fn)
+}
+
+func Iter(data interface{}, path string, fn func(i int, node interface{}) error) error {
+	jsx := &JsonHolder{Data: data}
+	return jsx.Iter(path, fn)
 }
