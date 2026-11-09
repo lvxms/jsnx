@@ -1,3 +1,3 @@
-module jsnx
+module github.com/lvxms/jsnx
 
-go 1.25.0
+go 1.20.0
